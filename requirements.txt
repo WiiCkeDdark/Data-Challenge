@@ -5,3 +5,7 @@ scikit-learn
 openpyxl==3.1.2
 statsmodels
 ta
+seaborn
+dash-ag-grid
+dash-bootstrap-components
+dash
