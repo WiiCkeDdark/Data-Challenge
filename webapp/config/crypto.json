@@ -1,70 +1,70 @@
 {
-  "cryptocurrencies": [
-    {
-      "id": 1,
-      "symbol": "BTC",
-      "name": "Bitcoin",
-      "start_date": "08-2017"
-    },
-    {
-      "id": 2,
-      "symbol": "ETH",
-      "name": "Ethereum",
-      "start_date": "08-2017"
-    },
-    {
-      "id": 3,
-      "symbol": "BNB",
-      "name": "Ethereum",
-      "start_date": "08-2017"
-    },
-    {
-      "id": 4,
-      "symbol": "LTC",
-      "name": "Ethereum",
-      "start_date": "08-2017"
-    },
-    {
-      "id": 5,
-      "symbol": "DOGE",
-      "name": "Ethereum",
-      "start_date": "08-2017"
-    },
-    {
-      "id": 6,
-      "symbol": "BCH",
-      "name": "Ethereum",
-      "start_date": "08-2017"
-    },
-    {
-      "id": 7,
-      "symbol": "XRP",
-      "name": "Ethereum",
-      "start_date": "08-2017"
-    },
-    {
-      "id": 8,
-      "symbol": "MATIC",
-      "name": "Ethereum",
-      "start_date": "08-2017"
-    },
-    {
-      "id": 9,
-      "symbol": "ADA",
-      "name": "Ethereum",
-      "start_date": "08-2017"
-    },
-    {
-      "id": 10,
-      "symbol": "DOT",
-      "name": "Ethereum",
-      "start_date": "08-2017"
-    },
-    {
-      "id": 11,
-      "symbol": "sol",
-      "name": "Ethereum",
-      "start_date": "08-2017"
-    }
-  ]
+    "cryptocurrencies": [
+        {
+            "id": 1,
+            "symbol": "BTC",
+            "name": "Bitcoin",
+            "start_date": "08-2017"
+        },
+        {
+            "id": 2,
+            "symbol": "ETH",
+            "name": "Ethereum",
+            "start_date": "08-2017"
+        },
+        {
+            "id": 3,
+            "symbol": "BNB",
+            "name": "Binance Coin",
+            "start_date": "08-2017"
+        },
+        {
+            "id": 4,
+            "symbol": "LTC",
+            "name": "Litecoin",
+            "start_date": "08-2017"
+        },
+        {
+            "id": 5,
+            "symbol": "DOGE",
+            "name": "Dogecoin",
+            "start_date": "11-2019"
+        },
+        {
+            "id": 6,
+            "symbol": "BCH",
+            "name": "Bitcoin Cash",
+            "start_date": "11-2019"
+        },
+        {
+            "id": 7,
+            "symbol": "XRP",
+            "name": "Ripple",
+            "start_date": "05-2018"
+        },
+        {
+            "id": 8,
+            "symbol": "MATIC",
+            "name": "Polygon MATIC",
+            "start_date": "05-2019"
+        },
+        {
+            "id": 9,
+            "symbol": "ADA",
+            "name": "Cardano ADA",
+            "start_date": "03-2020"
+        },
+        {
+            "id": 10,
+            "symbol": "DOT",
+            "name": "Polka Dot",
+            "start_date": "08-2020"
+        },
+        {
+            "id": 11,
+            "symbol": "SOL",
+            "name": "Solana",
+            "start_date": "08-2020"
+        }
+    ]
 }
