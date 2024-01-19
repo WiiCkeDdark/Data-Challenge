@@ -3,6 +3,7 @@ import logging.config
 
 import uvicorn
 from fastapi import FastAPI
+from dataclasses import dataclass
 
 from pydantic import BaseModel
 from typing import Dict
@@ -10,6 +11,7 @@ from typing import Dict
 api = FastAPI(title="Crypto Backtest", docs_url="/docs")
 
 
+@dataclass
 class ConfigModel(BaseModel):
     wallet_amount: float
     start_date: str
