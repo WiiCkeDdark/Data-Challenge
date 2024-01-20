@@ -7,7 +7,7 @@ import os
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 
-from webapp.strategies.base import Strategy, StrategyConfig
+from strategies.base import Strategy, StrategyConfig
 
 class NaiveStrategy(Strategy):
     def __init__(self, config: StrategyConfig, dataset_path: str) -> None:
