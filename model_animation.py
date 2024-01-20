@@ -195,7 +195,7 @@ for row in x_test.iterrows():
     c_datetime = row[0].to_pydatetime()
     data.append(
         [
-            c_datetime.strftime("%Y-%m-%m"),
+            c_datetime.strftime("%Y-%m-%d"),
             rendement,
             "4%",
             prediction,

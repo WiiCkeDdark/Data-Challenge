@@ -192,10 +192,14 @@ app.layout = dbc.Container(
     ],
 )
 def update_rendement_graph(start_date, end_date):
+    dashboard_csv_data_as_datetime = pd.to_datetime(
+        dashboard.csv_data["date"], format="%Y-%m-%d"
+    )
+
     # Filter the DataFrame based on the date range
     filtered_df = dashboard.csv_data[
-        (dashboard.csv_data["date"] >= start_date)
-        & (dashboard.csv_data["date"] <= end_date)
+        (dashboard_csv_data_as_datetime >= start_date)
+        & (dashboard_csv_data_as_datetime <= end_date)
     ]
     rendement_predit_trace = create_scatter_line(
         x_data=filtered_df["date"],
@@ -224,9 +228,12 @@ def update_rendement_graph(start_date, end_date):
     ],
 )
 def update_portefeuille_graph(start_date, end_date):
+    dashboard_csv_data_as_datetime = pd.to_datetime(
+        dashboard.csv_data["date"], format="%Y-%m-%d"
+    )
     filtered_df = dashboard.csv_data[
-        (dashboard.csv_data["date"] >= start_date)
-        & (dashboard.csv_data["date"] <= end_date)
+        (dashboard_csv_data_as_datetime >= start_date)
+        & (dashboard_csv_data_as_datetime <= end_date)
     ]
 
     valeur_portefeuille = create_scatter_line(
@@ -263,7 +270,7 @@ def update_value_card(end_date):
 
     # Find the row in the dataframe where the date is the end_date
     dashboard_csv_data_as_datetime = pd.to_datetime(
-        dashboard.csv_data, format="%Y-%m-%d"
+        dashboard.csv_data["date"], format="%Y-%m-%d"
     )
     closest_end = dashboard.csv_data[dashboard_csv_data_as_datetime <= end_date][
         "date"
@@ -296,7 +303,7 @@ def update_growth_percentage(start_date, end_date):
     # Get the closest available dates in the dataset
     closest_start = dashboard.csv_data["date"].min()
     dashboard_csv_data_as_datetime = pd.to_datetime(
-        dashboard.csv_data, format="%Y-%m-%d"
+        dashboard.csv_data["date"], format="%Y-%m-%d"
     )
     closest_end = dashboard.csv_data[dashboard_csv_data_as_datetime <= end_date][
         "date"
