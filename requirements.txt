@@ -11,3 +11,4 @@ seaborn
 dash-ag-grid
 dash-bootstrap-components
 dash
+typer

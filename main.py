@@ -1,5 +1,6 @@
 from strategies.naive import NaiveStrategy
 from strategies.trend import TrendStrategy
+from strategies.trendsigma import TrendSigmaStrategy
 import typer
 from typing import List, Optional
 from strategies.base import Strategy, StrategyConfig 
@@ -9,13 +10,14 @@ app = typer.Typer()
 
 strategies: dict[str, Strategy] = {
     "xgboost": TrendStrategy,
+    "xgboost-sigma": TrendSigmaStrategy,
     "naive": NaiveStrategy,
 }
 
 cryptos: dict[str, bool] = {
             "BTC": True,
             "ETH": True,
-            "DOGE": False,
+            "DOGE": True,
             "XRP": False,
             "DOT": False,
             "BCH": False,
@@ -28,7 +30,7 @@ cryptos: dict[str, bool] = {
 
 @app.command()
 def run(all: bool = False, 
-         list: Optional[list[str]] = typer.Option(None, "--list"),
+         crypto: Optional[str] = typer.Option(None, "--crypto"),
          output: Optional[str] = typer.Option("./backtest_examples", "--output"),
          strategy: Optional[str] = typer.Option("xgboost", "--strategy"),
          dataset: Optional[str] = typer.Option("federalfinancegestion/Rennes_DataChallenge2024_Cryptomarkets_dataset.xlsx", "--dataset"),
@@ -39,14 +41,11 @@ def run(all: bool = False,
 ) :
     if all:
         typer.echo("Testing all cryptocurrencies")
-    elif list:
+    elif crypto:
         typer.echo(f"Testing selected cryptocurrencies: {list}")
         for i in cryptos:
             cryptos[i] = False
-        for name in list:
-            if cryptos.get(name) is True:
-                cryptos[name] = True        
-        print(cryptos)
+        cryptos[crypto] = True
                 
     config = StrategyConfig(start_date=start_date, transaction_fee=fee, wallet_amount=start_wallet, cryptos=cryptos)
     

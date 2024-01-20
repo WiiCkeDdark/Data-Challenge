@@ -23,7 +23,9 @@ class TrendStrategy(Strategy):
         self.models: dict[str, any] = {
             "BTC": self.load_xgb_model("./models/btc.json"),
             "ETH": self.load_xgb_model("./models/ETH.json"),
-            "DOGE": self.load_xgb_model("./models/DOGE.json")
+            "XRP": self.load_xgb_model("./models/XRP.model"),
+            "LTC": self.load_xgb_model("./models/LTC.model"),
+            "SOL": self.load_xgb_model("./models/SOL.model")
         }
         print("Modèles chargés")
 
@@ -32,11 +34,12 @@ class TrendStrategy(Strategy):
         df = xgb.DMatrix(df)
         prediction = self.models[crypto_name].predict(df)
         return prediction
-        
+            
     def run_strategy(self, row: pd.Series, test_datasets: dict[str, pd.DataFrame], days_elapsed: int) -> None:
         rendement: str = "0%"
         prediction: str = "neutral"
         alpha: str = "100%"
+        line: list = []
     
         for name in self.config.cryptos:
             if self.config.cryptos[name] is True:
@@ -51,18 +54,26 @@ class TrendStrategy(Strategy):
                     rendement = "-2%"
                     prediction = "bear"
                     alpha = "50%"
-                self.backtests_outputs[name].append(
-                    [
-                        row.iloc[0],
-                        rendement,
-                        "4%",
-                        prediction,
-                        alpha,
-                        self.compute_rendement(name, row, self.dataset.iloc[days_elapsed - 1]),
-                        self.portfolio[name] * row[f"Close_{name}"],
-                        row[f"Close_{name}"]
-                    ]
-                )
+                base_100 = 100
+                if days_elapsed > 0:
+                    print("Current row : ", row[f'Close_{name}'])
+                    base_100 = self.compute_base_100(name, row, days_elapsed, self.backtests_outputs[name][-1][7])
+                if days_elapsed < self.size - 1:
+                    self.backtests_outputs[name].append(
+                        [
+                            row.iloc[0],
+                            rendement,
+                            "4%",
+                            prediction,
+                            alpha,
+                            f"{self.compute_rendement(name, row, self.dataset.iloc[days_elapsed - 1]) * 100}%",
+                            self.portfolio[name] * row[f"Close_{name}"] + self.portfolio['risk_free'],
+                            base_100
+                        ]
+                    )
+                line.append([row.iloc[0], prediction, self.fill_observation(name, row,  self.dataset.iloc[days_elapsed - 1])])
+                print(line)
+                self.res_output.append(line)
 
     def preprocess(self, crypto_name: str) -> pd.DataFrame:
         df = self.dataset.copy()
@@ -127,13 +138,3 @@ class TrendStrategy(Strategy):
         print("Number of nan in test: ", df_test.isna().sum().sum())
         x_test = df_test.drop(columns=["Target"])
         return x_test
-
-if __name__ == "__main__":
-    # Exemple d'utilisation de la classe Strategy
-    config = StrategyConfig(start_date='2022-09-01', transaction_fee=0.0, wallet_amount=10000.0, cryptos=cryptos)
-    strategy = TrendStrategy(config, './strategies/test.xlsx', "./backup_examples")
-    strategy.load_data()
-    strategy.run_pipeline()
-    results = strategy.get_results()
-    print(results)
-    #results.to_csv('strategy_output.csv', index=False)
