@@ -35,6 +35,11 @@ async def run_test():
     return {"message": "Hello, world!"}
 
 
+@api.get("/get_status")
+async def get_status():
+    return {"message": "Hello, world!"}
+
+
 @api.get("/cancel")
 async def cancel():
     return {"message": "Hello, world!"}
