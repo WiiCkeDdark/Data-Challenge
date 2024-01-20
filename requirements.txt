@@ -5,12 +5,9 @@ scikit-learn
 openpyxl==3.1.2
 statsmodels
 ta
-<<<<<<< HEAD
 black
 docstr-coverage
-=======
 seaborn
 dash-ag-grid
 dash-bootstrap-components
 dash
->>>>>>> 2452041d904d5595b80f32e14e1289da899d8d12

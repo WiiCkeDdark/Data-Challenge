@@ -192,9 +192,10 @@ for row in x_test.iterrows():
     wallet_values.append(total_wallet_value)
     crypto_prices.append(current_price)
     dates.append(row[0])
+    c_datetime = row[0].to_pydatetime()
     data.append(
         [
-            row[0],
+            c_datetime.strftime("%Y-%m-%m"),
             rendement,
             "4%",
             prediction,

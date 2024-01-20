@@ -8,6 +8,7 @@ import dash_bootstrap_components as dbc
 import dash_ag_grid as dag
 from utils.load_csv import load_csv
 from utils.find_crypto import find_crypto_df
+from datetime import datetime
 
 unique_cryptos = [
     "BTC",
@@ -261,7 +262,10 @@ def update_value_card(end_date):
     )
 
     # Find the row in the dataframe where the date is the end_date
-    closest_end = dashboard.csv_data[dashboard.csv_data["date"] <= end_date][
+    dashboard_csv_data_as_datetime = pd.to_datetime(
+        dashboard.csv_data, format="%Y-%m-%d"
+    )
+    closest_end = dashboard.csv_data[dashboard_csv_data_as_datetime <= end_date][
         "date"
     ].max()
     value_at_end_date = dashboard.csv_data.loc[
@@ -291,7 +295,10 @@ def update_growth_percentage(start_date, end_date):
 
     # Get the closest available dates in the dataset
     closest_start = dashboard.csv_data["date"].min()
-    closest_end = dashboard.csv_data[dashboard.csv_data["date"] <= end_date][
+    dashboard_csv_data_as_datetime = pd.to_datetime(
+        dashboard.csv_data, format="%Y-%m-%d"
+    )
+    closest_end = dashboard.csv_data[dashboard_csv_data_as_datetime <= end_date][
         "date"
     ].max()
 
