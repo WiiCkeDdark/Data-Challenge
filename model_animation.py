@@ -5,9 +5,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.animation import FuncAnimation
+import datetime
 
-
-crypto = "ETH"
+crypto = "BTC"
 
 
 def load_xgb_model(path: str) -> any:
@@ -102,11 +102,9 @@ stophold_crypto = usd_balance / head_price
 
 
 def compute_rendement(
-    crypto_name: str, current_price: float, previous_price: float, current_value: float
+    crypto_name: str, current_price: float, previous_price: float
 ) -> float:
-    tmp = current_price / previous_price - 1
-    current_value += current_value * tmp
-    return current_value
+    return current_price / previous_price - 1
 
 
 def predict_category(rendement_predit, vol_empirique):
@@ -120,11 +118,11 @@ def predict_category(rendement_predit, vol_empirique):
 
 def calculate_alpha(prediction):
     if prediction == 1:
-        return 1.0
+        return "100%"
     elif prediction == "bear":
-        return 0.5
+        return "50%"
     else:
-        return 1.0  # La logique exacte n'est pas claire pour 'neutral'
+        return "100%"  # La logique exacte n'est pas claire pour 'neutral'
 
 
 def calculate_portfolio_value(previous_value, alpha, rendement_observe):
@@ -149,13 +147,27 @@ col = [
     "valeur_portefeuille",
     "valeur_crypto",
 ]
-data = [[]]
+data = [
+    [
+        "date",
+        "rendement_predit",
+        "vol_empirique",
+        "prediction",
+        "alpha(expo_crypto)",
+        "rendement_observe",
+        "valeur_portefeuille",
+        "valeur_crypto",
+    ]
+]
 
 for row in x_test.iterrows():
     df = pd.DataFrame(row[1]).transpose()
     current_series = dataset.iloc[idx]
     current_price = current_series["Close_BTC"]
-
+    previous_price = current_price
+    if idx != 0:
+        previous_series = dataset.iloc[idx - 1]
+        previous_price = previous_series["Close_BTC"]
     stophold_value = stophold_crypto * current_price
     stophold.append(stophold_value)
     gMatrix = xgb.DMatrix(df)
@@ -170,35 +182,44 @@ for row in x_test.iterrows():
         rendement = "2%"
         prediction = "bull"
         usd_balance = 0
-        print("Buy on", row[0], " - Bought", crypto_bought, "crypto")
     elif preds_daily[0] == 2 and crypto_holdings != 0:
         usd_balance += crypto_holdings * current_price
         rendement = "-2%"
         prediction = "bear"
-        print("Sell on", row[0], " - Sold", crypto_holdings, "crypto")
         crypto_holdings = 0
 
     total_wallet_value = usd_balance + (crypto_holdings * current_price)
     wallet_values.append(total_wallet_value)
     crypto_prices.append(current_price)
     dates.append(row[0])
-    data.append([row[0], rendement, "4%", prediction])
+    data.append(
+        [
+            row[0],
+            rendement,
+            "4%",
+            prediction,
+            calculate_alpha(preds_daily),
+            compute_rendement("", current_price, previous_price),
+            total_wallet_value,
+            current_price,
+        ]
+    )
 
-new_df = pd.DataFrame(data[1:], columns=col)
+new_df = pd.DataFrame(data[1:], columns=data[0])
+new_df.to_csv("./btc_backtest.csv", index=False)
 
+# data = pd.DataFrame(
+#     {
+#         "Date": dates * 2,
+#         "Value": wallet_values + stophold,
+#         "Metric": ["Wallet Value"] * len(wallet_values)
+#         + ["StopHold Price"] * len(stophold),
+#     }
+# )
+# plt.figure(figsize=(12, 6))
+# sns.lineplot(x="Date", y="Value", hue="Metric", style="Metric", data=data)
+# plt.xlabel("Date")
+# plt.ylabel("Wallet Value (USD)")
+# plt.title("Evolution of Wallet Value and StopHold Price Over Time")
 
-data = pd.DataFrame(
-    {
-        "Date": dates * 2,
-        "Value": wallet_values + stophold,
-        "Metric": ["Wallet Value"] * len(wallet_values)
-        + ["StopHold Price"] * len(stophold),
-    }
-)
-plt.figure(figsize=(12, 6))
-sns.lineplot(x="Date", y="Value", hue="Metric", style="Metric", data=data)
-plt.xlabel("Date")
-plt.ylabel("Wallet Value (USD)")
-plt.title("Evolution of Wallet Value and StopHold Price Over Time")
-
-plt.show()
+# plt.show()
