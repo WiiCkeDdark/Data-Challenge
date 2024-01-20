@@ -22,7 +22,7 @@ class TrendStrategy(Strategy):
         print("Chargement des modèles...")
         self.models: dict[str, any] = {
             "BTC": self.load_xgb_model("./models/btc.json"),
-            "ETH": self.load_xgb_model("./models/ETH.json"),
+            "ETH": self.load_xgb_model("./models/ETH.model"),
             "XRP": self.load_xgb_model("./models/XRP.model"),
             "LTC": self.load_xgb_model("./models/LTC.model"),
             "SOL": self.load_xgb_model("./models/SOL.model")
