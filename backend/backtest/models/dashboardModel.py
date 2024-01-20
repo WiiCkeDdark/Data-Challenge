@@ -1,5 +1,11 @@
 from graphs.create_graphs import create_scatter_line, create_pie_chart, create_figure
 from utils.clean_csv import clean_numeric
+from utils.find_crypto import find_crypto_df
+from utils.load_csv import load_csv
+import pandas as pd
+from dash import dcc
+
+crypto_objects = load_csv()
 
 
 class Dashboard:
@@ -33,7 +39,6 @@ class Dashboard:
     def create_rend_graph(self):
         # Clean and convert percentage columns to floats
 
-        print(type(self.csv_data["rendement_predit"]))
         self.csv_data["rendement_predit"] = pd.to_numeric(
             self.csv_data["rendement_predit"].astype(str).str.replace("%", ""),
             errors="coerce",
