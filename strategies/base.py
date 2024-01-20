@@ -86,28 +86,25 @@ class Strategy:
         pass
     
     def compute_rendement(self, crypto_name: str, current_row: Series, previous_row: Series) -> float:
-        tmp = (current_row[f'Close_{crypto_name}'] / previous_row[f'Close_{crypto_name}'] - 1)
         print("Rendement ", crypto_name, "", (current_row[f'Close_{crypto_name}'] / previous_row[f'Close_{crypto_name}'] - 1) * 100)
-        self.portfolio[crypto_name] += self.portfolio[crypto_name] * tmp
-        return self.portfolio[crypto_name]
+        return current_row[f'Close_{crypto_name}'] / previous_row[f'Close_{crypto_name}'] - 1
     
     def compute_portofolio_sum(self, current_row: Series, previous_row: Series):
         total: float = 0
         for i in self.config.cryptos:
             if self.config.cryptos[i] is True:
-                total += self.compute_rendement(i, current_row, previous_row)
-        print("Total =", total) 
-        self.portfolio['total'] = self.portfolio['risk_free'] - total
+                total += self.portfolio[i] * current_row[f'Close_{i}']
+        self.portfolio['total'] = self.portfolio['risk_free'] + total
     
     def buy(self, current_row: pd.Series, crypto_name: str, amount: float, fees: float = 0):
-        if amount < 0:
+        if amount == 0:
             return
         print("J'achète", crypto_name, "pour ", amount)
         self.portfolio['risk_free'] -= amount
-        self.portfolio[crypto_name] += amount - amount * fees / current_row[f'Close_{crypto_name}']
+        self.portfolio[crypto_name] += amount / current_row[f'Close_{crypto_name}'] # 
             
     def send(self, current_row: pd.Series, crypto_name: str, amount: float, fees: float = 0):
-        if amount < 0:
+        if amount == 0:
             return
         print("Je vends", crypto_name, "pour ", amount)
         self.portfolio[crypto_name] -= amount
@@ -135,4 +132,5 @@ class Strategy:
 
         except Exception:
             print("Le dataset de test n'a pas pu être chargé")
+            exit(84)
         print("Le dataset de test a été chargé correctement")

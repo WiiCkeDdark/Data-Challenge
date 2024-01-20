@@ -9,7 +9,7 @@ from sklearn.impute import SimpleImputer
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 
-from webapp.strategies.base import Strategy, StrategyConfig
+from strategies.base import Strategy, StrategyConfig
 
 BULL = 1
 BEAR = 2
@@ -22,7 +22,8 @@ class TrendStrategy(Strategy):
         print("Chargement des modèles...")
         self.models: dict[str, any] = {
             "BTC": self.load_xgb_model("./models/btc.json"),
-            "ETH": self.load_xgb_model("./models/ETH.json")
+            "ETH": self.load_xgb_model("./models/ETH.json"),
+            "DOGE": self.load_xgb_model("./models/DOGE.json")
         }
         print("Modèles chargés")
 
@@ -110,7 +111,7 @@ if __name__ == "__main__":
     cryptos: dict[str, bool] = {
         "BTC": True,
         "ETH": True,
-        "DOGE": False,
+        "DOGE": True,
         "XRP": False,
         "DOT": False,
         "BCH": False,
@@ -121,7 +122,7 @@ if __name__ == "__main__":
         "LTC": False,
     }
     config = StrategyConfig(start_date='2022-09-01', transaction_fee=0.0, wallet_amount=10000.0, cryptos=cryptos)
-    strategy = TrendStrategy(config, './webapp/strategies/test.xlsx')
+    strategy = TrendStrategy(config, './strategies/test.xlsx')
     strategy.load_data()
     strategy.run_pipeline()
     results = strategy.get_results()
