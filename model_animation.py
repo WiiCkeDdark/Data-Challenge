@@ -87,7 +87,7 @@ end_date = "2020-01-01"
 df_test = df.loc[start_date:end_date]
 x_test = df_test.drop(columns=["Target"])
 
-mdl = load_xgb_model("./btc.model")
+mdl = load_xgb_model("./BTC.model")
 crypto_holdings = 0
 usd_balance = 10000
 wallet_values = []
@@ -104,7 +104,7 @@ stophold_crypto = usd_balance / head_price
 def compute_rendement(
     crypto_name: str, current_price: float, previous_price: float
 ) -> float:
-    return current_price / previous_price - 1
+    return f"{(current_price / previous_price - 1) * 100}%"
 
 
 def predict_category(rendement_predit, vol_empirique):
