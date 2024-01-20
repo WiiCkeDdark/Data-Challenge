@@ -19,10 +19,11 @@ unique_cryptos = [
 ]
 
 crypto_objects = load_csv()
+date_format = "%Y-%m-%d %H:%M:%S"
 
 
 class Dashboard:
-    csv_data = find_crypto_df(crypto_objects, unique_cryptos[0])
+    csv_data = find_crypto_df(crypto_objects, "BTC")
 
     def __init__(self, data: pd.DataFrame):
         self.csv_data = data
@@ -51,13 +52,15 @@ class Dashboard:
 
     def create_rend_graph(self):
         # Clean and convert percentage columns to floats
-        self.csv_data["rendement_predit"] = clean_numeric(
-            self.csv_data["rendement_predit"], "%"
+
+        print(type(self.csv_data["rendement_predit"]))
+        self.csv_data["rendement_predit"] = pd.to_numeric(
+            self.csv_data["rendement_predit"].astype(str).str.replace("%", ""),
+            errors="coerce",
         )
         self.csv_data["rendement_observe"] = clean_numeric(
             self.csv_data["rendement_observe"], "%"
         )
-
         # Create Plotly graph objects for both rendement_predit and rendement_observe
         rendement_predit_trace = create_scatter_line(
             x_data=self.csv_data["date"],
@@ -193,7 +196,7 @@ app.layout = dbc.Container(
 )
 def update_rendement_graph(start_date, end_date):
     dashboard_csv_data_as_datetime = pd.to_datetime(
-        dashboard.csv_data["date"], format="%Y-%m-%d"
+        dashboard.csv_data["date"], format=date_format
     )
 
     # Filter the DataFrame based on the date range
@@ -229,7 +232,7 @@ def update_rendement_graph(start_date, end_date):
 )
 def update_portefeuille_graph(start_date, end_date):
     dashboard_csv_data_as_datetime = pd.to_datetime(
-        dashboard.csv_data["date"], format="%Y-%m-%d"
+        dashboard.csv_data["date"], format=date_format
     )
     filtered_df = dashboard.csv_data[
         (dashboard_csv_data_as_datetime >= start_date)
@@ -270,15 +273,14 @@ def update_value_card(end_date):
 
     # Find the row in the dataframe where the date is the end_date
     dashboard_csv_data_as_datetime = pd.to_datetime(
-        dashboard.csv_data["date"], format="%Y-%m-%d"
+        dashboard.csv_data["date"], format=date_format
     )
     closest_end = dashboard.csv_data[dashboard_csv_data_as_datetime <= end_date][
         "date"
     ].max()
     value_at_end_date = dashboard.csv_data.loc[
-        dashboard.csv_data["date"] == closest_end, "valeur_portefeuille"
+        dashboard_csv_data_as_datetime == closest_end, "valeur_portefeuille"
     ].iloc[0]
-
     # If the value is not found, it means end_date is not in the dataframe, return a default message
     if pd.isna(value_at_end_date):
         return "No data for selected date"
@@ -303,7 +305,7 @@ def update_growth_percentage(start_date, end_date):
     # Get the closest available dates in the dataset
     closest_start = dashboard.csv_data["date"].min()
     dashboard_csv_data_as_datetime = pd.to_datetime(
-        dashboard.csv_data["date"], format="%Y-%m-%d"
+        dashboard.csv_data["date"], format=date_format
     )
     closest_end = dashboard.csv_data[dashboard_csv_data_as_datetime <= end_date][
         "date"
@@ -332,11 +334,6 @@ from dash.dependencies import Input, Output
 @app.callback(Output("chart-content", "children"), [Input("crypto-dropdown", "value")])
 def update_output(selected_crypto):
     dashboard.csv_data = find_crypto_df(crypto_objects, selected_crypto)
-    children = [
-        dashboard.create_prediction_pie(),
-        dashboard.create_rend_graph(),
-        dashboard.create_wallet_chart(),
-    ]
     return html.Div(
         id="all_charts",
         children=[
