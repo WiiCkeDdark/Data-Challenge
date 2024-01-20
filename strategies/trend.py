@@ -16,8 +16,8 @@ BEAR = 2
 NEUTRAL = 3
 
 class TrendStrategy(Strategy):
-    def __init__(self, config: StrategyConfig, dataset_path: str) -> None:
-        Strategy.__init__(self, config, dataset_path)
+    def __init__(self, config: StrategyConfig, dataset_path: str, output_path: str) -> None:
+        Strategy.__init__(self, config, dataset_path, output_path)
         self.crypto_std_devs = {}
         print("Chargement des modèles...")
         self.models: dict[str, any] = {
@@ -34,13 +34,35 @@ class TrendStrategy(Strategy):
         return prediction
         
     def run_strategy(self, row: pd.Series, test_datasets: dict[str, pd.DataFrame], days_elapsed: int) -> None:
+        rendement: str = "0%"
+        prediction: str = "neutral"
+        alpha: str = "100%"
+    
         for name in self.config.cryptos:
             if self.config.cryptos[name] is True:
                 predicted_return = self.predict_return(test_datasets[name].iloc[days_elapsed], name)
-                if predicted_return == 1:
+                if predicted_return == 1:            
                     self.buy(row, name, self.portfolio['risk_free'])
+                    rendement = "2%"
+                    prediction = "bull"
+                    alpha = "100%"
                 elif predicted_return == 2:
                     self.send(row, name, self.portfolio[name] * 0.5)
+                    rendement = "-2%"
+                    prediction = "bear"
+                    alpha = "50%"
+                self.backtests_outputs[name].append(
+                    [
+                        row.iloc[0],
+                        rendement,
+                        "4%",
+                        prediction,
+                        alpha,
+                        self.compute_rendement(name, row, self.dataset.iloc[days_elapsed - 1]),
+                        self.portfolio[name] * row[f"Close_{name}"],
+                        row[f"Close_{name}"]
+                    ]
+                )
 
     def preprocess(self, crypto_name: str) -> pd.DataFrame:
         df = self.dataset.copy()
@@ -108,21 +130,8 @@ class TrendStrategy(Strategy):
 
 if __name__ == "__main__":
     # Exemple d'utilisation de la classe Strategy
-    cryptos: dict[str, bool] = {
-        "BTC": True,
-        "ETH": True,
-        "DOGE": True,
-        "XRP": False,
-        "DOT": False,
-        "BCH": False,
-        "SOL": False,
-        "ADA": False,
-        "MATIC": False,
-        "BNB": False,
-        "LTC": False,
-    }
     config = StrategyConfig(start_date='2022-09-01', transaction_fee=0.0, wallet_amount=10000.0, cryptos=cryptos)
-    strategy = TrendStrategy(config, './strategies/test.xlsx')
+    strategy = TrendStrategy(config, './strategies/test.xlsx', "./backup_examples")
     strategy.load_data()
     strategy.run_pipeline()
     results = strategy.get_results()

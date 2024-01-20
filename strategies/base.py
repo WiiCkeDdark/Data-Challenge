@@ -1,8 +1,21 @@
 from dataclasses import dataclass
+import os
 import pandas as pd
 from pandas import Series, DataFrame
-from strategies.output import calculate_alpha, calculate_crypto_value, calculate_portfolio_value, predict_category
 import xgboost as xgb
+
+data_backtest_csv = [
+    [
+        "date",
+        "rendement_predit",
+        "vol_empirique",
+        "prediction",
+        "alpha(expo_crypto)",
+        "rendement_observe",
+        "valeur_portefeuille",
+        "valeur_crypto",
+    ]
+]
 
 @dataclass
 class StrategyConfig:
@@ -13,15 +26,18 @@ class StrategyConfig:
 
 
 class Strategy:
-    def __init__(self, config: StrategyConfig, dataset_path: str) -> None:
+    def __init__(self, config: StrategyConfig, dataset_path: str, output_path: str) -> None:
         self.config = config
         self.dataset_path = dataset_path
         self.dataset = None
         self.config = config
         self.portfolio = {'total': 0, 'risk_free': config.wallet_amount}
         self.portfolio_sum = 0
+        self.root_folder = output_path
         self.portfolio_history = []
         self.test_datasets: dict[str, DataFrame] = {}
+        self.backtests_outputs: dict[str, list[list]] = {}
+        
         print("Voici les cryptomonnaies prises en compte dans cette simulation :")
         for name in config.cryptos:
             if self.config.cryptos[name] is True:
@@ -30,25 +46,15 @@ class Strategy:
     
     def preprocess(self, crypto_name: str) -> pd.DataFrame:
         return None
+        
+    def export_backtest_csv(self) -> pd.DataFrame:
+        print("Génération des fichiers backtest au format .csv")
+        os.makedirs(self.root_folder, exist_ok=True)
+        for i in self.config.cryptos:
+            if self.config.cryptos[i] is True:
+                new_df = pd.DataFrame(self.backtests_outputs[i][1:], columns=self.backtests_outputs[i][0])
+                new_df.to_csv(os.path.join(self.root_folder, f"{i}_backtest.csv"), index=False)
     
-    def fill_backtest_csv(self, df: DataFrame, path: str):
-        # Ajouter les colonnes nécessaires avec des valeurs par défaut ou calculées
-        df['prediction'] = df.apply(lambda row: predict_category(row['rendement_predit'], row['vol_empirique']), axis=1)
-        df['alpha'] = df['prediction'].apply(calculate_alpha)
-        df['valeur_portefeuille'] = self.portfolio["risk_free"]
-        df['valeur_crypto'] = 0
-
-        # Calculer les valeurs du portefeuille et de la crypto-monnaie pour chaque jour
-        for i in range(1, len(df)):
-            previous_value = df.at[i - 1, 'valeur_portefeuille']
-            alpha = df.at[i, 'alpha']
-            rendement_observe = df.at[i, 'rendement_observe'] / 100  # Convertir en pourcentage
-            df.at[i, 'valeur_portefeuille'] = calculate_portfolio_value(previous_value, alpha, rendement_observe)
-            df.at[i, 'valeur_crypto'] = calculate_crypto_value(df.at[i, 'valeur_portefeuille'], alpha)
-
-        # Écrire les résultats dans un nouveau fichier CSV
-        df.to_csv(path, index=False)
-
     def load_xgb_model(self, path: str) -> any:
         # Charge le modèle de machine learning pour une crypto-monnaie spécifique
         model = xgb.Booster()
@@ -68,6 +74,7 @@ class Strategy:
         for name in self.config.cryptos:
             if self.config.cryptos[name] is True:
                 self.test_datasets[name] = self.preprocess(name)
+                self.backtests_outputs[name] = data_backtest_csv.copy()
         self.compute_vol_empirique()
         days_elapsed = 0
         print("Déroulement de la stratégie...")
@@ -78,6 +85,7 @@ class Strategy:
                 self.portfolio_history.append((days_elapsed, self.portfolio.copy()))
             days_elapsed += 1
             self.debug()
+        self.export_backtest_csv()
     
     def run_strategy() -> None:
         pass
@@ -86,7 +94,6 @@ class Strategy:
         pass
     
     def compute_rendement(self, crypto_name: str, current_row: Series, previous_row: Series) -> float:
-        print("Rendement ", crypto_name, "", (current_row[f'Close_{crypto_name}'] / previous_row[f'Close_{crypto_name}'] - 1) * 100)
         return current_row[f'Close_{crypto_name}'] / previous_row[f'Close_{crypto_name}'] - 1
     
     def compute_portofolio_sum(self, current_row: Series, previous_row: Series):
